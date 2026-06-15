@@ -10,19 +10,28 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
     message(FATAL_ERROR "In-source builds are not allowed. Use: cmake -S . -B build")
 endif()
 
+# ---------------------------------------------------------------------------
+# TODO (Module 2 lab):
+#   Everything is crammed into ONE executable target. The game logic (world.*)
+#   cannot be reused or unit-tested without dragging in main().
+#
+#   Refactor into a proper target graph:
+#     1. a `game-core` LIBRARY that exposes its headers via a PUBLIC include dir
+#        and requires cxx_std_17 PUBLIC-ly (so consumers inherit both);
+#     2. the `dungeon` executable that links game-core PRIVATE and gets the
+#        include path + C++17 transitively — no need to repeat them.
+#
+#   Suggested pitchfork layout:
+#     libs/game-core/{include/dungeon/world.hpp, source/world.cpp, CMakeLists.txt}
+#     apps/dungeon/{main.cpp, CMakeLists.txt}
+#   Use add_subdirectory() (library first — order matters).
+#
+#   The `check` target reports when the split is correct → flag.
+# ---------------------------------------------------------------------------
+
 add_executable(dungeon)
-target_sources(dungeon PRIVATE main.cpp)
+target_sources(dungeon PRIVATE src/main.cpp src/world.cpp src/world.hpp)
+target_include_directories(dungeon PRIVATE src)
 target_compile_features(dungeon PRIVATE cxx_std_17)
 
-# --- Capture the Build -------------------------------------------------------
-# Builds the game, runs it, then awards the flag if the build is well-formed.
-add_custom_target(check
-    COMMAND ${CMAKE_COMMAND} -E echo "── Running Dungeon ──────────────────────"
-    COMMAND $<TARGET_FILE:dungeon>
-    COMMAND ${CMAKE_COMMAND}
-            -DFLAG=flag{hello_cmake}
-            -DSRC=${CMAKE_SOURCE_DIR}
-            -DBIN=${CMAKE_BINARY_DIR}
-            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Flag.cmake
-    DEPENDS dungeon
-    VERBATIM)
+include(cmake/CaptureTheBuild.cmake)
