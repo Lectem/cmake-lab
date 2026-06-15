@@ -1,0 +1,27 @@
+# Build trees (out-of-source — see Module 1)
+build/
+**/build/
+out/
+**/out/
+cmake-build-*/
+**/cmake-build-*/
+
+# CMake user-local files
+CMakeUserPresets.json
+CMakeCache.txt
+CMakeFiles/
+
+# CPM source/download cache (kept out of the repo on purpose — Module 5)
+.cache/
+**/_deps/
+cpm-cache/
+
+# IDE / editor
+.vs/
+.vscode/
+.idea/
+*.user
+
+# OS cruft
+.DS_Store
+Thumbs.db
