@@ -5,15 +5,10 @@ project(Dungeon
     DESCRIPTION "A tiny roguelike we grow across the CMake course"
     LANGUAGES CXX)
 
-# ---------------------------------------------------------------------------
-# TODO (Module 1 lab):
-#   Right now this project happily configures even when you run CMake *inside*
-#   the source tree, scattering CMakeCache.txt / CMakeFiles/ all over your
-#   sources. Add a guard here that stops configuration with a FATAL_ERROR on an
-#   in-source build, then re-run the `check` target to capture your first flag.
-#
-#   Hint: compare CMAKE_SOURCE_DIR with CMAKE_BINARY_DIR.
-# ---------------------------------------------------------------------------
+# Bury the first anti-pattern: stop in-source builds before they pollute the tree.
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+    message(FATAL_ERROR "In-source builds are not allowed. Use: cmake -S . -B build")
+endif()
 
 add_executable(dungeon)
 target_sources(dungeon PRIVATE main.cpp)
