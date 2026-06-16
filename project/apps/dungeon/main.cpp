@@ -32,22 +32,37 @@ void render(const dungeon::World& w) {
 
 int main() {
     auto world = dungeon::World::fromAscii(kMap);
+
+#ifdef DUNGEON_CHEATS
+    std::cout << "[cheats] enabled — you can read this build's secrets.\n";
+#endif
+
     std::cout << "Start:\n";
     render(world);
 
     // Scripted walk for now — real keyboard input arrives with SDL3 in Module 5.
     const std::string script = "ddddsss"; // right x4, down x3
+    int moves = 0;
     for (const char c : script) {
+        bool moved = false;
         switch (c) {
-            case 'd': world.tryMove(1, 0); break;
-            case 'a': world.tryMove(-1, 0); break;
-            case 'w': world.tryMove(0, -1); break;
-            case 's': world.tryMove(0, 1); break;
+            case 'd': moved = world.tryMove(1, 0); break;
+            case 'a': moved = world.tryMove(-1, 0); break;
+            case 'w': moved = world.tryMove(0, -1); break;
+            case 's': moved = world.tryMove(0, 1); break;
             default: break;
         }
+        if (moved) ++moves;
     }
 
     std::cout << "\nAfter walking \"" << script << "\":\n";
     render(world);
+
+#ifdef DUNGEON_HUD
+    const auto p = world.player();
+    std::cout << "\n[HUD] player=(" << p.x << ',' << p.y << ")"
+              << " moves=" << moves << " of " << script.size() << " keys\n";
+#endif
+
     return 0;
 }

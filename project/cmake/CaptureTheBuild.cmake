@@ -1,47 +1,49 @@
-# Capture the Build — Module 2 verifier.
+# Capture the Build — Module 3 verifier.
 #
-# Checks (at configure time, where target topology is visible) that the project
-# is split into a `game-core` LIBRARY linked PRIVATE-ly by the `dungeon`
-# executable. Writes the result to build/flag.txt; the `check` target prints it.
+# Confirms the project is customizable the modern way: no hardcoded global
+# optimization flag, an opt-in cheats OPTION, and a config-gated debug HUD that
+# uses a generator expression (so it survives multi-config generators).
 
 set(_ok TRUE)
 set(_why "")
 
-if(NOT TARGET game-core)
+# Precondition: the Module 2 split must still stand.
+if(NOT TARGET game-core OR NOT TARGET dungeon)
     set(_ok FALSE)
-    set(_why "there is no 'game-core' target yet — extract the game logic into a library")
-else()
-    get_target_property(_type game-core TYPE)
-    if(NOT _type MATCHES "LIBRARY")
+    set(_why "the game-core / dungeon split is missing")
+endif()
+
+# (a) No optimization flag hardcoded into the global flags — let the config decide.
+if(_ok AND CMAKE_CXX_FLAGS MATCHES "-O[0-9s]")
+    set(_ok FALSE)
+    set(_why "remove the hardcoded optimization flag from CMAKE_CXX_FLAGS — the config type owns that")
+endif()
+
+# (b) Cheats must be an opt-in cache option (optional features stay optional).
+if(_ok)
+    get_property(_cheats_type CACHE DUNGEON_ENABLE_CHEATS PROPERTY TYPE)
+    if(NOT _cheats_type STREQUAL "BOOL")
         set(_ok FALSE)
-        set(_why "'game-core' is a ${_type}, not a library")
+        set(_why "add option(DUNGEON_ENABLE_CHEATS ...) instead of hardcoding the feature")
     endif()
 endif()
 
+# (c) The debug HUD must be gated by a generator expression on the config.
 if(_ok)
-    get_target_property(_src_dir game-core SOURCE_DIR)
-    if(_src_dir STREQUAL CMAKE_SOURCE_DIR)
+    get_target_property(_defs dungeon COMPILE_DEFINITIONS)
+    if(NOT _defs MATCHES "CONFIG:Debug" OR NOT _defs MATCHES "DUNGEON_HUD")
         set(_ok FALSE)
-        set(_why "'game-core' was defined in the root CMakeLists.txt — use add_subdirectory() to move it into its own directory")
-    endif()
-endif()
-
-if(_ok)
-    get_target_property(_libs dungeon LINK_LIBRARIES)
-    if(NOT _libs MATCHES "game-core")
-        set(_ok FALSE)
-        set(_why "'dungeon' does not link game-core")
+        set(_why "gate DUNGEON_HUD with a generator expression: $<$<CONFIG:Debug>:DUNGEON_HUD>")
     endif()
 endif()
 
 if(_ok)
     file(WRITE "${CMAKE_BINARY_DIR}/flag.txt"
-        "  ✅  Library + executable split is well-formed.\n"
-        "  🚩  flag{transitive_propagation_unlocked}\n")
+        "  ✅  Configurable the modern way — no global flag clobbering, optional stays optional.\n"
+        "  🚩  flag{options_stay_optional}\n")
 else()
     file(WRITE "${CMAKE_BINARY_DIR}/flag.txt"
-        "  ⛔  Not yet: ${_why}.\n"
-        "      Goal: a 'game-core' library with PUBLIC include dir, linked PRIVATE by 'dungeon'.\n")
+        "  ⛔  Not yet: ${_why}.\n")
 endif()
 
 add_custom_target(check
