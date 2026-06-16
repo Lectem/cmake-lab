@@ -14,3 +14,7 @@ target_compile_definitions(dungeon PRIVATE $<$<CONFIG:Debug>:DUNGEON_HUD>)
 if(DUNGEON_ENABLE_CHEATS)
     target_compile_definitions(dungeon PRIVATE DUNGEON_CHEATS)
 endif()
+
+# TODO (Module 4 lab) — install the executable into bin/:
+#   include(GNUInstallDirs)
+#   install(TARGETS dungeon RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
