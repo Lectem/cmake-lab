@@ -25,3 +25,10 @@ cpm-cache/
 # OS cruft
 .DS_Store
 Thumbs.db
+
+# Slide tooling — rikiki is installed via npm; the symlink is recreated by setup.
+# package.json + package-lock.json ARE committed so `npm install` reproduces it.
+slides/node_modules/
+slides/rikiki
+slides/_*.png
+slides/_*.html
