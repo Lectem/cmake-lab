@@ -19,30 +19,33 @@ option(DUNGEON_ENABLE_CHEATS "Build with cheat output" OFF)
 add_subdirectory(libs/game-core)
 add_subdirectory(apps/dungeon)
 
-# TODO (Module 4 lab) — export the package and enable CPack.
-#   After the subdirectory install(TARGETS ... EXPORT DungeonTargets) rules:
-#
-#   install(EXPORT DungeonTargets
-#           NAMESPACE dungeon::
-#           DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Dungeon
-#           FILE DungeonTargets.cmake)
-#
-#   include(CMakePackageConfigHelpers)
-#   configure_package_config_file(
-#       ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DungeonConfig.cmake.in
-#       ${CMAKE_CURRENT_BINARY_DIR}/DungeonConfig.cmake
-#       INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Dungeon)
-#   write_basic_package_version_file(
-#       ${CMAKE_CURRENT_BINARY_DIR}/DungeonConfigVersion.cmake
-#       VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion)
-#   install(FILES
-#       ${CMAKE_CURRENT_BINARY_DIR}/DungeonConfig.cmake
-#       ${CMAKE_CURRENT_BINARY_DIR}/DungeonConfigVersion.cmake
-#       DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Dungeon)
-#
-#   set(CPACK_PACKAGE_VENDOR "Dungeon")
-#   set(CPACK_GENERATOR "ZIP;TGZ")
-#   include(CPack)
-# (See labs/module-04-packaging.md — copy-paste ready.)
+# Export the package so downstream projects can `find_package(Dungeon CONFIG)`.
+# The export set ships our targets WITH their usage requirements (the PUBLIC
+# include dir + C++17) across the package boundary.
+install(EXPORT DungeonTargets
+        NAMESPACE dungeon::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Dungeon
+        FILE DungeonTargets.cmake)
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DungeonConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/DungeonConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Dungeon)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/DungeonConfigVersion.cmake
+    VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion)
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/DungeonConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/DungeonConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Dungeon)
+
+# CPack reuses the install() rules to produce redistributable packages.
+# Top-level only: a project that add_subdirectory's us shouldn't inherit our packaging.
+if(PROJECT_IS_TOP_LEVEL)
+    set(CPACK_PACKAGE_VENDOR "Dungeon")
+    set(CPACK_GENERATOR "ZIP;TGZ")   # + NSIS/WIX on Windows, DEB/RPM on Linux
+    include(CPack)
+endif()
 
 include(cmake/CaptureTheBuild.cmake)
