@@ -40,6 +40,11 @@ add_custom_command(
 target_sources(dungeon PRIVATE ${_gen})
 target_include_directories(dungeon PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
+# Build-time git SHA (Module 9): see version.generated.hpp, stamped by the
+# dungeon-version target. Depend on it so the header exists before we compile.
+target_include_directories(dungeon PRIVATE ${DUNGEON_VERSION_INCLUDE_DIR})
+add_dependencies(dungeon dungeon-version)
+
 # Install the executable into the platform's bin/ dir.
 include(GNUInstallDirs)
 install(TARGETS dungeon RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

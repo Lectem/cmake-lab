@@ -40,9 +40,19 @@ option(DUNGEON_ENABLE_CHEATS "Build with cheat output" OFF)
 
 # Targets are declared in subdirectories. Order matters: a target must exist
 # before another can link it, so the library comes first.
+include(cmake/GitVersion.cmake)     # build-time git SHA + version stamping (dungeon-version target)
+
 add_subdirectory(libs/game-core)
 include(cmake/HostTool.cmake)       # resolves the levelpack host tool (native build vs. cross)
 add_subdirectory(apps/dungeon)
+
+# LTO/IPO (Module 9): only after a support check, only in Release, never blindly
+# global. Set here because both targets must already exist.
+include(CheckIPOSupported)
+check_ipo_supported(RESULT _ipo OUTPUT _ipo_msg)
+if(_ipo)
+    set_target_properties(game-core dungeon PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+endif()
 
 # Export the package so downstream projects can `find_package(Dungeon CONFIG)`.
 # The export set ships our targets WITH their usage requirements (the PUBLIC
