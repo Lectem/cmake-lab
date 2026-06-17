@@ -17,23 +17,19 @@
 
 #include "dungeon/world.hpp"
 
-namespace {
+// Generated at build time by the levelpack host tool (Module 7). It defines
+// dungeon::kIntroLevel. Until you wire the codegen step, this header is missing
+// and the app won't compile.
+#include "dungeon/levels.generated.hpp"
 
-constexpr const char* kMap =
-    "##########\n"
-    "#@...#...#\n"
-    "#.##.#.#.#\n"
-    "#....#.#.#\n"
-    "#.####.#.#\n"
-    "#........#\n"
-    "##########\n";
+namespace {
 
 constexpr int kCell = 48; // pixels per tile
 
 struct App {
     SDL_Window*   window   = nullptr;
     SDL_Renderer* renderer = nullptr;
-    dungeon::World world   = dungeon::World::fromAscii(kMap);
+    dungeon::World world   = dungeon::World::fromAscii(dungeon::kIntroLevel);
 };
 
 } // namespace
