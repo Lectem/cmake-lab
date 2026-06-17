@@ -33,6 +33,18 @@ option(DUNGEON_ENABLE_CHEATS "Build with cheat output" OFF)
 # consumer who passes -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF. ASan likewise lives in
 # a toolchain file (cmake/toolchains/asan.cmake), selected by a preset.
 
+# Bonus (Module 10): a compiler launcher (ccache/sccache) for fast rebuilds.
+# Guarded by find_program, so it's a silent no-op where the tool isn't installed.
+option(DUNGEON_USE_CCACHE "Use ccache/sccache if available" ON)
+if(DUNGEON_USE_CCACHE)
+    find_program(CCACHE_PROGRAM NAMES ccache sccache)
+    if(CCACHE_PROGRAM)
+        set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
+        set(CMAKE_C_COMPILER_LAUNCHER   ${CCACHE_PROGRAM})
+        message(STATUS "Compiler launcher: ${CCACHE_PROGRAM}")
+    endif()
+endif()
+
 # Dependencies are DECLARED once in cmake/Dependencies.cmake (wired in as the
 # provider above). No targets are created here: each subdirectory pulls what it
 # needs with find_package(Foo CONFIG REQUIRED) and CPM satisfies the call. That
