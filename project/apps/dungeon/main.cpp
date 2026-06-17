@@ -22,6 +22,10 @@
 // and the app won't compile.
 #include "dungeon/levels.generated.hpp"
 
+// Generated at build time from git (Module 9): dungeon::kVersion + kGitSha.
+// Re-stamped every build so the SHA stays fresh. Missing until you wire it.
+#include "dungeon/version.generated.hpp"
+
 namespace {
 
 constexpr int kCell = 48; // pixels per tile
@@ -46,8 +50,10 @@ SDL_AppResult SDL_AppInit(void** appstate, int /*argc*/, char** /*argv*/) {
     const int w = app->world.width()  * kCell;
     const int h = app->world.height() * kCell;
 
-    // fmt builds the title string — our first taste of a fetched dependency.
-    const std::string title = fmt::format("Dungeon — {}x{}", app->world.width(), app->world.height());
+    // fmt builds the title — now stamped with the version + git SHA baked in at
+    // build time, so the running window shows exactly which commit it came from.
+    const std::string title = fmt::format("Dungeon {} ({}) — {}x{}",
+        dungeon::kVersion, dungeon::kGitSha, app->world.width(), app->world.height());
 
     if (!SDL_CreateWindowAndRenderer(title.c_str(), w, h, 0, &app->window, &app->renderer)) {
         SDL_Log("CreateWindowAndRenderer failed: %s", SDL_GetError());
