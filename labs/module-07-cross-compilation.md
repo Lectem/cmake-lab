@@ -103,11 +103,11 @@ cmake --build build-host                             # host-built tool
 
 emcmake cmake -B build-web project \
     -DLEVELPACK_EXECUTABLE=$PWD/build-host/levelpack
-cmake --build build-web                              # → dungeon.html + dungeon.wasm
+cmake --build build-web                              # → dungeon.html (self-contained)
 ```
 
-You'll get a prebuilt `dungeon.html` to open and **play the game in your browser** — the exact bytes,
-no toolchain to install. That's cross-compilation paying off.
+The output is a single `dungeon.html` with JS and WASM inlined — open it directly in your browser,
+no server needed. That's cross-compilation paying off.
 
 ## Buried in the graveyard 🪦
 - Hardcoding `CMAKE_CXX_COMPILER` / paths inside `CMakeLists.txt` instead of a toolchain file.

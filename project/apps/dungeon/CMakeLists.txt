@@ -26,6 +26,27 @@ if(DUNGEON_ENABLE_CHEATS)
     target_compile_definitions(dungeon PRIVATE DUNGEON_CHEATS)
 endif()
 
+# Build-time code generation (Module 7): the levelpack HOST tool packs
+# levels/intro.txt into a header before main.cpp compiles. Listing `levelpack`
+# in DEPENDS makes CMake build it for the host and run it first — exactly what
+# lets the game cross-compile while the tool stays a host artifact.
+set(_gen ${CMAKE_CURRENT_BINARY_DIR}/generated/dungeon/levels.generated.hpp)
+add_custom_command(
+    OUTPUT  ${_gen}
+    COMMAND levelpack ${CMAKE_SOURCE_DIR}/levels/intro.txt ${_gen}
+    DEPENDS levelpack ${CMAKE_SOURCE_DIR}/levels/intro.txt
+    COMMENT "Packing levels with the host tool"
+    VERBATIM)
+target_sources(dungeon PRIVATE ${_gen})
+target_include_directories(dungeon PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/generated)
+
 # Install the executable into the platform's bin/ dir.
 include(GNUInstallDirs)
 install(TARGETS dungeon RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+# Emscripten (WebAssembly): the .html suffix makes emcc emit the HTML glue
+# automatically; SINGLE_FILE inlines JS + WASM so the result opens from file://.
+if(EMSCRIPTEN)
+    set_target_properties(dungeon PROPERTIES SUFFIX ".html")
+    target_link_options(dungeon PRIVATE -sSINGLE_FILE=1)
+endif()

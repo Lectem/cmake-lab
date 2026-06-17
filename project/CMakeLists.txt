@@ -35,6 +35,7 @@ option(DUNGEON_ENABLE_CHEATS "Build with cheat output" OFF)
 # Targets are declared in subdirectories. Order matters: a target must exist
 # before another can link it, so the library comes first.
 add_subdirectory(libs/game-core)
+include(cmake/HostTool.cmake)       # resolves the levelpack host tool (native build vs. cross)
 add_subdirectory(apps/dungeon)
 
 # Export the package so downstream projects can `find_package(Dungeon CONFIG)`.
