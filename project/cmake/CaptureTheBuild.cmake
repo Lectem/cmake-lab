@@ -1,21 +1,19 @@
-# Capture the Build — Module 5 verifier.
+# Capture the Build — Module 6 verifier.
 #
-# Goal of the module: consume real dependencies the RIGHT way — fetched via CPM
-# and linked through their NAMESPACED imported targets (SDL3::SDL3, fmt::fmt),
-# never the bare library name.
+# `check` drives the test suite through CTest. The flag prints only if every
+# test passes. At the module start no tests are registered, so CTest reports
+# "No tests were found" and the flag stays locked.
 #
-# We dump the executable's link interface at generation time with a generator
-# expression, then a -P script asserts the namespaced targets are present.
-file(GENERATE
-    OUTPUT  "${CMAKE_BINARY_DIR}/dungeon-links.txt"
-    CONTENT "$<TARGET_PROPERTY:dungeon,LINK_LIBRARIES>")
-
+# The dependency is wired only when the test target exists (i.e. once you've
+# added tests/ and fetched Catch2), so this same file works before and after.
 add_custom_target(check
-    COMMAND ${CMAKE_COMMAND}
-            -DLINKS=${CMAKE_BINARY_DIR}/dungeon-links.txt
-            -DFLAGFILE=${CMAKE_BINARY_DIR}/flag.txt
-            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CheckDeps.cmake
+    COMMAND ${CMAKE_CTEST_COMMAND} --test-dir "${CMAKE_BINARY_DIR}" --output-on-failure
     COMMAND ${CMAKE_COMMAND} -E echo ""
-    COMMAND ${CMAKE_COMMAND} -E cat "${CMAKE_BINARY_DIR}/flag.txt"
-    DEPENDS dungeon
+    COMMAND ${CMAKE_COMMAND} -E echo "  ✅  game-core is green."
+    COMMAND ${CMAKE_COMMAND} -E echo "  🚩  flag{green_tests}"
+    USES_TERMINAL
     VERBATIM)
+
+if(TARGET game-core-tests)
+    add_dependencies(check game-core-tests)
+endif()
