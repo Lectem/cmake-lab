@@ -66,4 +66,14 @@ if(PROJECT_IS_TOP_LEVEL)
     include(CPack)
 endif()
 
+# Tests (Module 6). include(CTest) calls enable_testing() and adds BUILD_TESTING.
+# Catch2 is pulled with find_package(Catch2) inside tests/, same vendor-neutral
+# pattern as SDL3/fmt. The subdir is added before the check target below so it
+# can depend on the test executable.
+option(DUNGEON_BUILD_TESTS "Build the unit tests" ${PROJECT_IS_TOP_LEVEL})
+if(DUNGEON_BUILD_TESTS)
+    include(CTest)
+    add_subdirectory(tests)
+endif()
+
 include(cmake/CaptureTheBuild.cmake)

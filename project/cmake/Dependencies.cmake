@@ -41,6 +41,12 @@ CPMDeclarePackage(SDL3
     GITHUB_REPOSITORY libsdl-org/SDL
     SYSTEM YES)
 
+CPMDeclarePackage(Catch2
+    NAME Catch2
+    VERSION 3.5.2
+    GITHUB_REPOSITORY catchorg/Catch2
+    SYSTEM YES)
+
 # The redirect. CMake calls this for every find_package(). If we declared the
 # package above, satisfy it from CPM and report success so CMake skips its own
 # search. Anything we did not declare falls through to the normal find_package()

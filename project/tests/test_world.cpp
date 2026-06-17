@@ -46,9 +46,7 @@ TEST_CASE("out-of-bounds moves are rejected") {
 }
 
 TEST_CASE("player starts at the @ marker") {
-    // TODO (Module 6 lab -- your one assertion):
-    //   Build a world whose '@' is NOT at the origin (see World::fromAscii in the
-    //   tests above), then CHECK that w.player() reports its row/column.
-    //   Replace the FAIL below once your assertion is in place.
-    FAIL("write the assertion for this test -- see labs/module-06-testing.md");
+    const World w = World::fromAscii("....\n..@.\n");
+    CHECK(w.player().x == 2);
+    CHECK(w.player().y == 1);
 }
