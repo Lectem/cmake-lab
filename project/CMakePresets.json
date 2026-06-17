@@ -1,0 +1,53 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": { "CMAKE_EXPORT_COMPILE_COMMANDS": "ON" }
+    },
+    {
+      "name": "linux-debug-asan",
+      "inherits": "base",
+      "displayName": "Linux Debug + ASan/UBSan",
+      "toolchainFile": "${sourceDir}/cmake/toolchains/asan.cmake",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" },
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
+    },
+    {
+      "name": "windows-debug-asan",
+      "inherits": "base",
+      "displayName": "Windows MSVC Debug + ASan",
+      "generator": "Visual Studio 17 2022",
+      "toolchainFile": "${sourceDir}/cmake/toolchains/asan-msvc.cmake",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "windows-msvc-release",
+      "inherits": "base",
+      "displayName": "Windows MSVC Release",
+      "generator": "Visual Studio 17 2022",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" },
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "wasm",
+      "inherits": "base",
+      "displayName": "WebAssembly (emscripten)",
+      "toolchainFile": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release", "DUNGEON_BUILD_TESTS": "OFF" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "linux-debug-asan",    "configurePreset": "linux-debug-asan" },
+    { "name": "windows-debug-asan",  "configurePreset": "windows-debug-asan",   "configuration": "Debug" },
+    { "name": "windows-msvc-release","configurePreset": "windows-msvc-release", "configuration": "Release" }
+  ],
+  "testPresets": [
+    { "name": "linux-debug-asan",   "configurePreset": "linux-debug-asan",   "output": { "outputOnFailure": true } },
+    { "name": "windows-debug-asan", "configurePreset": "windows-debug-asan", "configuration": "Debug", "output": { "outputOnFailure": true } }
+  ]
+}

@@ -27,6 +27,12 @@ endif()
 # known at configure time, so a plain if() (in apps/dungeon) is the right tool.
 option(DUNGEON_ENABLE_CHEATS "Build with cheat output" OFF)
 
+# Tooling (Module 8): the compile database (clang-tidy / clangd / IDEs) is a
+# per-developer, configure-time choice, so it is enabled in CMakePresets.json
+# (cacheVariables), not hard-set here. Hard-setting it would also override a
+# consumer who passes -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF. ASan likewise lives in
+# a toolchain file (cmake/toolchains/asan.cmake), selected by a preset.
+
 # Dependencies are DECLARED once in cmake/Dependencies.cmake (wired in as the
 # provider above). No targets are created here: each subdirectory pulls what it
 # needs with find_package(Foo CONFIG REQUIRED) and CPM satisfies the call. That
