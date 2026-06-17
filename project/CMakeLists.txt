@@ -1,4 +1,17 @@
-cmake_minimum_required(VERSION 3.22...3.28)
+cmake_minimum_required(VERSION 3.25...3.28)  # 3.25: dependency providers + SYSTEM (cmake/Dependencies.cmake)
+
+# Wire CPM in as the dependency provider BEFORE the first project() call. That is
+# the one moment CMake lets a provider register, and it makes every find_package()
+# below resolvable from source. Only when WE are the top-level build: if a parent
+# add_subdirectory's us, the provider is theirs to choose, and CMake reads this var
+# only at that first (top-level) project() anyway, so setting it here would be a
+# dead no-op. We can't gate on PROJECT_IS_TOP_LEVEL (it doesn't exist until
+# project() runs), so we compare source dirs. A preset, a -D, or a vcpkg toolchain
+# still overrides it.
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR
+   AND NOT DEFINED CMAKE_PROJECT_TOP_LEVEL_INCLUDES)
+    set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Dependencies.cmake)
+endif()
 
 project(Dungeon
     VERSION 0.1.0
@@ -13,6 +26,11 @@ endif()
 # Optional features stay optional: an opt-in switch, default OFF. Its value is
 # known at configure time, so a plain if() (in apps/dungeon) is the right tool.
 option(DUNGEON_ENABLE_CHEATS "Build with cheat output" OFF)
+
+# Dependencies are DECLARED once in cmake/Dependencies.cmake (wired in as the
+# provider above). No targets are created here: each subdirectory pulls what it
+# needs with find_package(Foo CONFIG REQUIRED) and CPM satisfies the call. That
+# is the exact same line a vcpkg or Conan shop would write, which is the point.
 
 # Targets are declared in subdirectories. Order matters: a target must exist
 # before another can link it, so the library comes first.

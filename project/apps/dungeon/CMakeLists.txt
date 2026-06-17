@@ -1,9 +1,20 @@
 add_executable(dungeon)
 target_sources(dungeon PRIVATE main.cpp)
 
+# SDL3 and fmt are real CMake packages. We ask for them the vendor-neutral way.
+# The dependency provider (cmake/Dependencies.cmake) maps these onto CPM, but the
+# lines below are identical to what a vcpkg or Conan build would use.
+find_package(SDL3 CONFIG REQUIRED)
+find_package(fmt  CONFIG REQUIRED)
+
 # Nobody links the executable → PRIVATE. The include path and C++17 arrive
 # transitively from game-core's PUBLIC usage requirements — don't repeat them.
-target_link_libraries(dungeon PRIVATE dungeon::game-core)
+# SDL3 and fmt are implementation details of the app → PRIVATE, and linked
+# through their NAMESPACED imported targets (not bare `SDL3`).
+target_link_libraries(dungeon PRIVATE
+    dungeon::game-core
+    SDL3::SDL3
+    fmt::fmt)
 
 # Debug-only HUD via a generator expression — evaluated per-config at generation
 # time, so it works under single- AND multi-config generators (unlike branching
